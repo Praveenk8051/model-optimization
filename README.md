@@ -1,8 +1,38 @@
-# model-optimization
+# Model Optimization
 
-https://github.com/ketangangal/Awesome-Model-Optimization?tab=readme-ov-file
-https://github.com/sony/model_optimization?tab=readme-ov-file
-https://github.com/tensorflow/model-optimization
-https://colab.research.google.com/github/spmallick/learnopencv/blob/master/TensorFlow-Lite-Model-Optimization-for-On-Device-MachineLearning/TensorFlow_Lite_Model_Optimization_for_On_Device_Machine_Learning.ipynb#scrollTo=ihsxzth3dGh7
+Optimising ML Models for efficient deployment, especially on systems without GPUs involves several key techniques. This notebook will cover the following:
 
-https://colab.research.google.com/github/d2l-ai/d2l-en-colab/blob/master/chapter_optimization/optimization-intro.ipynb#scrollTo=5dc6eedb
+1. Model Quantization
+2. Model Pruning
+3. Knowledge Distillation
+
+
+## Model Quantization
+
+Post-Training Quantization (PTQ)
+
+Quantization-Aware Training (QAT)
+
+## Model Pruning
+
+Weight Pruning (Unstructured Pruning)
+
+Neuron Pruning (Structured Pruning)
+
+Layer Pruning
+
+## Knowledge Distillation
+
+Response-Based Knowledge Distillation (Logit Distillation)
+
+Feature-Based Knowledge Distillation (Intermediate Representation Transfer)
+
+Relation-Based Knowledge Distillation
+
+Self-Knowledge Distillation
+
+Cross-Model Knowledge Distillation
+
+Online Knowledge Distillation
+
+Multi-Teacher Knowledge Distillation
