@@ -1,20 +1,30 @@
 # Model Optimization
 
-Optimising ML Models for efficient deployment, especially on systems without GPUs involves several key techniques. This notebook will cover the following:
+This repository contains resources and code examples for machine learning model optimization techniques to enhance model efficiency, speed, and deployment capabilities, especially on systems without GPUs.
 
-1. Model Quantization
-2. Model Pruning
-3. Knowledge Distillation
+## Code Examples
 
-# Challenges:
+This repository includes:
 
-Every technique has its own challenges and trade-offs. Some of the common challenges include:
+1. **MNIST Training:** A minimal CNN model for MNIST digit recognition that runs efficiently on CPU
+2. **Model Optimization:** Implementation of multiple optimization techniques demonstrated on the MNIST model
 
-- Loss of Precision and Accuracy
-- Impact on Performance
-- Challenging techniques-Layer-wise, adaptive, rouding, etc.
+To run the examples:
 
-## Model Quantization
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Train the original model
+python mnist_training.py
+
+# Apply optimization techniques
+python model_optimization.py
+```
+
+## Optimization Techniques
+
+### Model Quantization
 
 Quantization is a technique used to reduce the size and memory footprint of neural network models. It involves converting the weights and activations of a neural network from high-precision floating-point numbers to lower-precision formats, such as 16-bit or 8-bit integers.
 
@@ -26,33 +36,42 @@ After training a deep learning model with high precision, you modify it to use l
 
 During the training process, the model is aware that it will operate with less precise calculations, and it learns to handle this from the beginning. It's like training a chef from the start to be efficient with a specific set of kitchen tools. Model accuracy and performance decreases but performs better than Post-Training Quantization.
 
-## Model Pruning
+### Model Pruning
 
 Model pruning refers to the technique for improving the efficiency and complexity of machine learning models by removing unnecessary parameters. 
 
-
 **Weight Pruning** *(Unstructured Pruning)*
 
-The idea behind weight pruning involves removing individual weights or connections within a neural network that are not contributing significantly to the model’s performance.
+The idea behind weight pruning involves removing individual weights or connections within a neural network that are not contributing significantly to the model's performance.
 
 **Neuron Pruning** *(Structured Pruning)*
 
-Neuron pruning involves removing entire neurons from a neural network that are not contributing significantly to the model’s performance. This can be done at the layer level or the channel level in convolutional neural networks.
+Neuron pruning involves removing entire neurons from a neural network that are not contributing significantly to the model's performance. This can be done at the layer level or the channel level in convolutional neural networks.
 
-Layer Pruning
+### Knowledge Distillation
 
-## Knowledge Distillation
+Knowledge distillation transfers knowledge from a large model (teacher) to a smaller model (student). Types include:
 
-Response-Based Knowledge Distillation (Logit Distillation)
+- Response-Based Knowledge Distillation (Logit Distillation)
+- Feature-Based Knowledge Distillation (Intermediate Representation Transfer)
+- Relation-Based Knowledge Distillation
+- Self-Knowledge Distillation
+- Cross-Model Knowledge Distillation
+- Online Knowledge Distillation
+- Multi-Teacher Knowledge Distillation
 
-Feature-Based Knowledge Distillation (Intermediate Representation Transfer)
+## Challenges
 
-Relation-Based Knowledge Distillation
+Every technique has its own challenges and trade-offs. Some of the common challenges include:
 
-Self-Knowledge Distillation
+- Loss of Precision and Accuracy
+- Impact on Performance
+- Implementation complexity - Layer-wise, adaptive, rounding, etc.
 
-Cross-Model Knowledge Distillation
+## Resources
 
-Online Knowledge Distillation
-
-Multi-Teacher Knowledge Distillation
+- [TensorFlow Model Optimization Toolkit](https://www.tensorflow.org/model_optimization)
+- [PyTorch Tutorials on Quantization](https://pytorch.org/docs/stable/quantization.html)
+- [ONNX Runtime Optimization Guide](https://onnxruntime.ai/docs/performance/model-optimizations.html)
+- [Neural Network Distiller by Intel](https://github.com/IntelLabs/distiller)
+- [Awesome Model Compression Papers](https://github.com/cedrickchee/awesome-ml-model-compression)
