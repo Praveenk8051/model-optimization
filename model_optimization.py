@@ -4,7 +4,10 @@ import os
 import time
 from tensorflow.keras.models import load_model
 import tensorflow_model_optimization as tfmot
-from tensorflow_model_optimization.python.core.quantization.keras import quantize_model
+from tensorflow_model_optimization.quantization.keras import quantize_model
+from tensorflow.keras.layers import LocallyConnected1D
+
+
 
 # Load the saved model
 print("Loading original model...")
@@ -40,34 +43,48 @@ def evaluate_model(model, description):
 original_acc, original_size, original_time = evaluate_model(model, "original")
 
 # ===== OPTIMIZATION METHOD 1: PRUNING =====
-print("\n===== APPLYING PRUNING =====")
-# Define pruning parameters
-pruning_params = {
-    'pruning_schedule': tfmot.sparsity.keras.PolynomialDecay(
-        initial_sparsity=0.0,
-        final_sparsity=0.5,
-        begin_step=0,
-        end_step=1000
-    )
-}
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Input
+from tensorflow_model_optimization.sparsity.keras import prune_low_magnitude
+from tensorflow_model_optimization.sparsity.keras import PolynomialDecay
 
-# Apply pruning to the model
-pruning_model = tfmot.sparsity.keras.prune_low_magnitude(model, **pruning_params)
+
+# Define the pruning schedule
+pruning_schedule = PolynomialDecay(
+    initial_sparsity=0.0,
+    final_sparsity=0.5,
+    begin_step=0,
+    end_step=1000
+)
+
+# Create a new model and apply pruning layer by layer
+pruned_layers = []
+for layer in model.layers:
+    if isinstance(layer, tf.keras.layers.Conv2D) or isinstance(layer, tf.keras.layers.Dense):
+        # Apply pruning to Conv2D and Dense layers
+        pruned_layer = prune_low_magnitude(layer, pruning_schedule=pruning_schedule)
+        pruned_layers.append(pruned_layer)
+    else:
+        # Keep other layers as is
+        pruned_layers.append(layer)
+
+# Recreate the model architecture with pruned layers
+if isinstance(model, Sequential):
+    pruning_model = Sequential(pruned_layers)
+else:
+    # For functional model, you'll need to rebuild the graph
+    # This is a simplification and might need adjustment based on your model
+    inputs = Input(shape=model.input_shape[1:])
+    x = inputs
+    for layer in pruned_layers:
+        x = layer(x)
+    pruning_model = tf.keras.Model(inputs, x)
+
+# Compile the pruned model
 pruning_model.compile(
     optimizer='adam',
     loss='sparse_categorical_crossentropy',
     metrics=['accuracy']
-)
-
-# Train the pruned model with a few epochs to adapt to pruning
-print("Fine-tuning pruned model...")
-pruning_callbacks = [tfmot.sparsity.keras.UpdatePruningStep()]
-pruning_model.fit(
-    x_test, y_test,  # Use test data for quick demo
-    batch_size=128,
-    epochs=2,
-    callbacks=pruning_callbacks,
-    verbose=1
 )
 
 # Strip pruning for final model
@@ -76,8 +93,15 @@ pruned_acc, pruned_size, pruned_time = evaluate_model(final_pruned_model, "prune
 
 # ===== OPTIMIZATION METHOD 2: QUANTIZATION =====
 print("\n===== APPLYING QUANTIZATION =====")
-# Define the quantization configuration
-quantization_aware_model = quantize_model(model)
+from tensorflow_model_optimization.quantization.keras import quantize_annotate_model
+from tensorflow_model_optimization.quantization.keras import quantize_apply
+
+# Step 1: Annotate the model for quantization
+annotated_model = quantize_annotate_model(model)
+
+# Step 2: Apply quantization to the annotated model
+quantization_aware_model = quantize_apply(annotated_model)
+
 quantization_aware_model.compile(
     optimizer='adam',
     loss='sparse_categorical_crossentropy',
