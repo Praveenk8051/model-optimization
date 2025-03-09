@@ -42,7 +42,7 @@ original_acc, original_size, original_time = evaluate_model(model, "original")
 
 # ===== OPTIMIZATION METHOD 1: PRUNING =====
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Input, Conv2D, Dense
+from tensorflow.keras.layers import Input, Conv2D, Dense, Flatten, MaxPooling2D
 from tensorflow_model_optimization.sparsity.keras import prune_low_magnitude, PolynomialDecay
 import tensorflow_model_optimization as tfmot
 
@@ -57,14 +57,14 @@ pruning_schedule = PolynomialDecay(
 # Create a new model and apply pruning layer by layer
 pruned_layers = []
 for layer in model.layers:
-    if isinstance(layer, (Conv2D, Dense)):  # Only prune Conv2D and Dense layers
+    if isinstance(layer, (Conv2D, Dense)):  # Prune only Conv2D and Dense layers
         pruned_layer = prune_low_magnitude(
-            layer.__class__.from_config(layer.get_config()),  # Clone layer correctly
+            layer,  # Pass the existing layer directly
             pruning_schedule=pruning_schedule
         )
     else:
         pruned_layer = layer  # Keep other layers unchanged
-    pruned_layers.append(pruned_layer)  # Append only once!
+    pruned_layers.append(pruned_layer)
 
 # Recreate the model architecture with pruned layers
 if isinstance(model, Sequential):
@@ -84,9 +84,10 @@ pruning_model.compile(
     metrics=['accuracy']
 )
 
-# Strip pruning for final model
+# Strip pruning for final model (for deployment)
 final_pruned_model = tfmot.sparsity.keras.strip_pruning(pruning_model)
 pruned_acc, pruned_size, pruned_time = evaluate_model(final_pruned_model, "pruned")
+
 
 
 
