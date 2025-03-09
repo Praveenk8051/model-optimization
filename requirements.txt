@@ -1,4 +1,0 @@
-tensorflow>=2.6.0
-numpy>=1.19.5
-tensorflow-model-optimization>=0.7.0
-tf_keras=2.18.0
