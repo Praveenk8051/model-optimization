@@ -5,8 +5,6 @@ import time
 from tensorflow.keras.models import load_model
 import tensorflow_model_optimization as tfmot
 from tensorflow_model_optimization.quantization.keras import quantize_model
-from tensorflow.keras.layers import LocallyConnected1D
-
 
 
 # Load the saved model
@@ -44,10 +42,9 @@ original_acc, original_size, original_time = evaluate_model(model, "original")
 
 # ===== OPTIMIZATION METHOD 1: PRUNING =====
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Input
-from tensorflow_model_optimization.sparsity.keras import prune_low_magnitude
-from tensorflow_model_optimization.sparsity.keras import PolynomialDecay
-
+from tensorflow.keras.layers import Input, Conv2D, Dense
+from tensorflow_model_optimization.sparsity.keras import prune_low_magnitude, PolynomialDecay
+import tensorflow_model_optimization as tfmot
 
 # Define the pruning schedule
 pruning_schedule = PolynomialDecay(
@@ -60,21 +57,21 @@ pruning_schedule = PolynomialDecay(
 # Create a new model and apply pruning layer by layer
 pruned_layers = []
 for layer in model.layers:
-    if isinstance(layer, tf.keras.layers.Conv2D) or isinstance(layer, tf.keras.layers.Dense):
-        # Apply pruning to Conv2D and Dense layers
-        pruned_layer = prune_low_magnitude(layer, pruning_schedule=pruning_schedule)
-        pruned_layers.append(pruned_layer)
+    if isinstance(layer, (Conv2D, Dense)):  # Only prune Conv2D and Dense layers
+        pruned_layer = prune_low_magnitude(
+            layer.__class__.from_config(layer.get_config()),  # Clone layer correctly
+            pruning_schedule=pruning_schedule
+        )
     else:
-        # Keep other layers as is
-        pruned_layers.append(layer)
+        pruned_layer = layer  # Keep other layers unchanged
+    pruned_layers.append(pruned_layer)  # Append only once!
 
 # Recreate the model architecture with pruned layers
 if isinstance(model, Sequential):
     pruning_model = Sequential(pruned_layers)
 else:
-    # For functional model, you'll need to rebuild the graph
-    # This is a simplification and might need adjustment based on your model
-    inputs = Input(shape=model.input_shape[1:])
+    # Rebuild Functional model properly
+    inputs = model.input  # Keep original model inputs
     x = inputs
     for layer in pruned_layers:
         x = layer(x)
@@ -90,6 +87,8 @@ pruning_model.compile(
 # Strip pruning for final model
 final_pruned_model = tfmot.sparsity.keras.strip_pruning(pruning_model)
 pruned_acc, pruned_size, pruned_time = evaluate_model(final_pruned_model, "pruned")
+
+
 
 # ===== OPTIMIZATION METHOD 2: QUANTIZATION =====
 print("\n===== APPLYING QUANTIZATION =====")
