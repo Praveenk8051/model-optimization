@@ -67,4 +67,5 @@ print(f"Test accuracy: {test_acc:.4f}")
 
 # Save the original model
 model.save('mnist_original.h5')
+model.save('mnist_original.keras')
 print("Original model saved as 'mnist_original.h5'")

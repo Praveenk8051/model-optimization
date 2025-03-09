@@ -9,7 +9,7 @@ from tensorflow_model_optimization.quantization.keras import quantize_model
 
 # Load the saved model
 print("Loading original model...")
-model = load_model('mnist_original.h5')
+model = load_model('mnist_original.keras')
 
 # Load test data for evaluation
 print("Loading test data...")

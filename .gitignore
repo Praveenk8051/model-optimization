@@ -1,3 +1,5 @@
 model_opt_env/
 mnist_original.h5
+mnist_original.keras
 model_opt_2/
+pycache/
